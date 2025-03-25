@@ -1,6 +1,6 @@
-import { db } from './config'
-import { collection, doc, setDoc, getDoc, updateDoc, onSnapshot, getDocs, serverTimestamp, deleteDoc, addDoc } from 'firebase/firestore'
-import { getAuth } from 'firebase/auth'
+import { db } from './config'  // llama base de datos
+import { collection, doc, setDoc, getDoc, updateDoc, onSnapshot, getDocs, serverTimestamp, deleteDoc, addDoc } from 'firebase/firestore' //manejar los registros de base de datos
+import { getAuth } from 'firebase/auth' //funcion obtener autentificacion
 
 class GameService {
   constructor() {

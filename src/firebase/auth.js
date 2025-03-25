@@ -1,9 +1,10 @@
-import { auth, db } from './config'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { auth, db } from './config' //llamamos la autentificacion y la base de datos
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'//trae las funciones propias de firebase
 import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
 
 export const AuthService = {
-  // Función auxiliar para capitalizar el nombre
+  // Función auxiliar para capitalizar el nombre 
+  //capitalizar poner la primera letra en mayuscula y el resto en minuscula
   capitalizeUsername(username) {
     return username.charAt(0).toUpperCase() + username.slice(1).toLowerCase()
   },
@@ -21,7 +22,7 @@ export const AuthService = {
     }
   },
 
-  // Registro de usuario
+  // Registro de usuario solo sirve para registrar
   async register({ email, password, userData }) {
     try {
       // Capitalizamos el nombre antes de verificar
@@ -78,6 +79,7 @@ export const AuthService = {
   },
 
   // Crear perfil de usuario en Firestore
+  //se guarda en la base de datos
   async createUserProfile(userId, userData) {
     try {
       await setDoc(doc(db, 'users', userId), {

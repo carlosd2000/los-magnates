@@ -47,6 +47,7 @@
 </template>
 
 <script>
+//importa las funciones auth.js
 import { AuthService } from '../firebase/auth'
 
 export default {

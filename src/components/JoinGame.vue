@@ -67,7 +67,6 @@ export default {
     const gameCode = ref('')
     const loading = ref(false)
     const error = ref('')
-    const gameCode = route.params.gameCode
 
     const isValidGameCode = computed(() => {
       return gameCode.value.length === 6
@@ -75,7 +74,7 @@ export default {
 
     const joinGame = async () => {
       if (!auth.currentUser) {
-        router.push(`/game-lobby/${gameCode}`)
+        router.push("/login")
         return
       }
 

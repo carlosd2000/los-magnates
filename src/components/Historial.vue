@@ -15,39 +15,39 @@
       </div>
     </div>
 
-    <div class="actions-container">
-      <button class="btn btn-success action-btn" @click="goToTransactions">
-        Transacciones
-      </button>
-      <button class="btn btn-success action-btn" @click="goToHistorial">
-        Historial
-      </button>
-      <button class="btn btn-success action-btn" @click="leaveGame">
-        salir de partida
-      </button>
-    </div>
-
-    <div class="logo-container">
-      <img src="../assets/monopoly-logo.png" alt="Monopoly Logo" class="monopoly-logo" />
+    <div class="transaction-form">
+      <h3 class="form-label">Historial:</h3>
+      <div class="amount-input">
+        <span class="currency-symbol">$</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getAuth } from 'firebase/auth'
 import { gameService } from '../firebase/gameService'
 
 export default {
-  name: 'GameView',
+  name: 'Historial',
   setup() {
     const router = useRouter()
     const route = useRoute()
     const auth = getAuth()
     const playerName = ref('')
     const playerBalance = ref(1500)
+    const amount = ref('')
+    const selectedDestination = ref('')
+    const otherPlayers = ref([])
     const gameCode = route.params.gameCode
+
+    const isValidTransaction = computed(() => {
+      return amount.value > 0 && 
+             amount.value <= playerBalance.value && 
+             selectedDestination.value
+    })
 
     onMounted(async () => {
       if (!auth.currentUser) {
@@ -62,6 +62,8 @@ export default {
         if (currentPlayer) {
           playerName.value = currentPlayer.name
           playerBalance.value = currentPlayer.saldo
+          // Filtrar jugadores para no incluir al jugador actual
+          otherPlayers.value = gameData.players.filter(p => p.id_user !== auth.currentUser.uid)
         } else {
           console.error('Jugador no encontrado en la partida')
           router.push('/game-room')
@@ -72,29 +74,34 @@ export default {
       }
     })
 
-    const leaveGame = async () => {
+    const selectDestination = (destination) => {
+      selectedDestination.value = destination
+    }
+
+    const sendMoney = async () => {
+      if (!isValidTransaction.value) return
+
       try {
-        await gameService.leaveGame(gameCode, auth.currentUser.uid)
-        router.push('/game-room')
+        await gameService.makeTransaction(gameCode, {
+          from: auth.currentUser.uid,
+          to: selectedDestination.value,
+          amount: Number(amount.value)
+        })
+        router.push(`/game/${gameCode}`)
       } catch (error) {
-        console.error('Error al salir de la partida:', error)
+        console.error('Error al realizar la transacción:', error)
       }
-    }
-
-    const goToTransactions = () => {
-      router.push(`/game/${gameCode}/transactions`)
-    }
-
-    const goToHistorial = () => {
-      router.push(`/game/${gameCode}/historial`)
     }
 
     return {
       playerName,
       playerBalance,
-      leaveGame,
-      goToTransactions,
-      goToHistorial
+      amount,
+      selectedDestination,
+      otherPlayers,
+      isValidTransaction,
+      selectDestination,
+      sendMoney
     }
   }
 }
@@ -156,46 +163,80 @@ export default {
   text-shadow: 2px 2px 0 #fff;
 }
 
-.actions-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.transaction-form {
   width: 80%;
   max-width: 300px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.action-btn {
+.form-label {
+  color: #000;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 1px 1px 0 #fff;
+}
+
+.amount-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #000;
+}
+
+.amount-input input {
+  padding-left: 2rem;
+  height: 3rem;
+  font-size: 1.2rem;
+  border-radius: 25px;
+  border: 2px solid var(--warning-color);
+}
+
+.destination-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dropdown-toggle {
+  border-radius: 25px;
+  height: 3rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.dropdown-menu {
+  border-radius: 15px;
+  padding: 0.5rem;
+}
+
+.dropdown-item {
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+}
+
+.dropdown-item:hover {
+  background-color: var(--warning-color);
+}
+
+.send-money-btn {
   padding: 1rem;
-  border: none;
   border-radius: 25px;
   font-size: 1.2rem;
   font-weight: bold;
   text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.action-btn:active,
-.action-btn:focus {
-  background-color: var(--warning-color) !important;
-  border-color: var(--warning-color) !important;
-  color: #000 !important;
-  transform: scale(0.98);
-}
-
-.action-btn:hover {
-  background-color: var(--warning-color) !important;
-  border-color: var(--warning-color) !important;
-  color: #000 !important;
-}
-
-.transactions-btn,
-.history-btn,
-.leave-btn {
-  background-color: var(--success-color);
-  color: white;
+  margin-top: 1rem;
 }
 
 .logo-container {

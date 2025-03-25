@@ -7,6 +7,7 @@ import GameLobby from '../components/GameLobby.vue'
 import JoinGame from '../components/JoinGame.vue'
 import GameView from '../components/GameView.vue'
 import TransactionView from '../components/TransactionView.vue'
+import Historial from '../components/Historial.vue'
 
 const routes = [
   {
@@ -55,6 +56,12 @@ const routes = [
     path: '/game/:gameCode/transactions',
     name: 'TransactionView',
     component: TransactionView,
+    props: true
+  },
+  {
+    path: '/game/:gameCode/historial',
+    name: 'Historial',
+    component: Historial,
     props: true
   }
 ]

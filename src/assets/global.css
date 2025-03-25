@@ -1,0 +1,15 @@
+:root {
+  --background-color: #87CEEB;
+  --success-color: #198754;
+  --warning-color: #FFD700;
+}
+
+.game-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--background-color);
+} 

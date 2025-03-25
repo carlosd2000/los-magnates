@@ -14,12 +14,13 @@
         </div>
       </div>
     </div>
-
-    <div class="transaction-form">
-      <h3 class="form-label">Historial:</h3>
-      <div class="amount-input">
-        <span class="currency-symbol">$</span>
-      </div>
+    <div class="text-white mb-4 text-shadow">
+      <h1 class="">Historial</h1>
+      <ul>
+        <li v-for="(transaction, index) in transactions" :key="index">
+          {{ transaction.date }} - {{ transaction.form }} envió {{ transaction.amount }} a {{ transaction.to }}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -250,5 +251,13 @@ export default {
 .monopoly-logo {
   width: 200px;
   height: auto;
+}
+
+.text-shadow {
+  text-shadow: -2px -2px 0 #000,  
+               2px -2px 0 #000,
+               -2px 2px 0 #000,
+               2px 2px 0 #000,
+               4px 4px 6px rgba(0, 0, 0, 0.3);
 }
 </style> 

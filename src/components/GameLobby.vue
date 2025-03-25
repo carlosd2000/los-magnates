@@ -31,7 +31,7 @@
     <button 
       v-if="isHost"
       @click="startGame" 
-      :disabled="loading || players.length < 2"
+      :disabled="loading || players.length < 2" 
       class="btn btn-success btn-lg mt-4 px-5 py-3 rounded-pill">
       Iniciar partida
     </button>

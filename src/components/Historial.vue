@@ -13,20 +13,32 @@
           <span class="balance-amount">${{ playerBalance }}</span>
         </div>
       </div>
+    
     </div>
-    <div class="text-white mb-4 text-shadow">
-      <h1 class="">Historial</h1>
-      <ul>
-        <li v-for="(transaction, index) in transactions" :key="index">
-          {{ transaction.date }} - {{ transaction.form }} envió {{ transaction.amount }} a {{ transaction.to }}
-        </li>
-      </ul>
+    
+    <div class="history-container">
+      <h2 class="history-title">Historial</h2>
+      <div class="history-box">
+        <p class="history-date">{{ currentDate }}</p>
+        <ul class="history-list">
+          <li v-for="(transaction, index) in transactions" :key="index" class="history-item">
+            <span class="transaction-description">{{ transaction.description }}</span>
+            <span class="transaction-amount">${{ transaction.amount }}</span>
+          </li>
+          
+        </ul>
+        
+      </div>
+      
     </div>
+        <div class="logo-container">
+          <img src="../assets/monopoly-logo.png" alt="Monopoly Logo" class="monopoly-logo" />
+        </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getAuth } from 'firebase/auth'
 import { gameService } from '../firebase/gameService'
@@ -39,16 +51,9 @@ export default {
     const auth = getAuth()
     const playerName = ref('')
     const playerBalance = ref(1500)
-    const amount = ref('')
-    const selectedDestination = ref('')
-    const otherPlayers = ref([])
+    const transactions = ref([])
     const gameCode = route.params.gameCode
-
-    const isValidTransaction = computed(() => {
-      return amount.value > 0 && 
-             amount.value <= playerBalance.value && 
-             selectedDestination.value
-    })
+    const currentDate = new Date().toLocaleDateString('es-ES')
 
     onMounted(async () => {
       if (!auth.currentUser) {
@@ -63,8 +68,7 @@ export default {
         if (currentPlayer) {
           playerName.value = currentPlayer.name
           playerBalance.value = currentPlayer.saldo
-          // Filtrar jugadores para no incluir al jugador actual
-          otherPlayers.value = gameData.players.filter(p => p.id_user !== auth.currentUser.uid)
+          transactions.value = gameData.transactions || []
         } else {
           console.error('Jugador no encontrado en la partida')
           router.push('/game-room')
@@ -75,40 +79,18 @@ export default {
       }
     })
 
-    const selectDestination = (destination) => {
-      selectedDestination.value = destination
-    }
-
-    const sendMoney = async () => {
-      if (!isValidTransaction.value) return
-
-      try {
-        await gameService.makeTransaction(gameCode, {
-          from: auth.currentUser.uid,
-          to: selectedDestination.value,
-          amount: Number(amount.value)
-        })
-        router.push(`/game/${gameCode}`)
-      } catch (error) {
-        console.error('Error al realizar la transacción:', error)
-      }
-    }
-
     return {
       playerName,
       playerBalance,
-      amount,
-      selectedDestination,
-      otherPlayers,
-      isValidTransaction,
-      selectDestination,
-      sendMoney
+      transactions,
+      currentDate
     }
   }
 }
 </script>
 
 <style scoped>
+
 .player-info {
   width: 100%;
   padding: 1rem;
@@ -164,80 +146,54 @@ export default {
   text-shadow: 2px 2px 0 #fff;
 }
 
-.transaction-form {
-  width: 80%;
-  max-width: 300px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+
+.history-container {
+  text-align: center;
+  color: white;
+  margin-top: 20px;
 }
 
-.form-label {
-  color: #000;
-  font-size: 1.2rem;
+.history-title {
+  font-size: 1.8rem;
   font-weight: bold;
-  margin: 0;
-  text-shadow: 1px 1px 0 #fff;
+  text-shadow: 2px 2px 0 black;
 }
 
-.amount-input {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.currency-symbol {
-  position: absolute;
-  left: 1rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #000;
-}
-
-.amount-input input {
-  padding-left: 2rem;
-  height: 3rem;
-  font-size: 1.2rem;
-  border-radius: 25px;
-  border: 2px solid var(--warning-color);
-}
-
-.destination-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.dropdown-toggle {
-  border-radius: 25px;
-  height: 3rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.dropdown-menu {
-  border-radius: 15px;
-  padding: 0.5rem;
-}
-
-.dropdown-item {
+.history-box {
+  background-color: #2d7c1f;
+  padding: 10px;
   border-radius: 10px;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
+  max-width: 90%;
+  margin: 0 auto;
 }
 
-.dropdown-item:hover {
-  background-color: var(--warning-color);
-}
-
-.send-money-btn {
-  padding: 1rem;
-  border-radius: 25px;
+.history-date {
   font-size: 1.2rem;
   font-weight: bold;
-  text-transform: uppercase;
-  margin-top: 1rem;
+  text-shadow: 1px 1px 0 black;
+  margin-bottom: 5px;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  color: white;
+  border-bottom: 1px solid white;
+  padding: 5px 0;
+}
+
+.transaction-description {
+  font-weight: bold;
+}
+
+.transaction-amount {
+  font-weight: bold;
 }
 
 .logo-container {
@@ -252,12 +208,4 @@ export default {
   width: 200px;
   height: auto;
 }
-
-.text-shadow {
-  text-shadow: -2px -2px 0 #000,  
-               2px -2px 0 #000,
-               -2px 2px 0 #000,
-               2px 2px 0 #000,
-               4px 4px 6px rgba(0, 0, 0, 0.3);
-}
-</style> 
+</style>

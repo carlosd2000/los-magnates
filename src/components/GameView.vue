@@ -22,8 +22,8 @@
       <button class="btn btn-success action-btn" @click="goToHistorial">
         Historial
       </button>
-      <button class="btn btn-success action-btn" @click="leaveGame">
-        salir de partida
+      <button class="btn btn-success action-btn" @click="confirmLeaveGame">
+        Salir de partida
       </button>
     </div>
 
@@ -38,6 +38,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getAuth } from 'firebase/auth'
 import { gameService } from '../firebase/gameService'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'GameView',
@@ -71,7 +72,7 @@ export default {
         router.push('/game-room')
       }
     })
-
+    
     const leaveGame = async () => {
       try {
         await gameService.leaveGame(gameCode, auth.currentUser.uid)
@@ -80,6 +81,25 @@ export default {
         console.error('Error al salir de la partida:', error)
       }
     }
+    
+
+  const confirmLeaveGame = () => {
+    Swal.fire({
+    title: '¿Seguro que desea salir de la partida?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Salir',
+    cancelButtonText: 'Seguir jugando',
+    confirmButtonColor: '#d33',  // Rojo
+    cancelButtonColor: '#28a745' // Verde
+    }).then((result) => {
+    if (result.isConfirmed) {
+      leaveGame()
+    }
+    })
+  }
+
+
 
     const goToTransactions = () => {
       router.push(`/game/${gameCode}/transactions`)
@@ -94,7 +114,8 @@ export default {
       playerBalance,
       leaveGame,
       goToTransactions,
-      goToHistorial
+      goToHistorial,
+      confirmLeaveGame
     }
   }
 }
